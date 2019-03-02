@@ -2,10 +2,9 @@ extern crate failure;
 extern crate proc_macro;
 #[macro_use]
 extern crate quote;
-#[macro_use]
-extern crate syn;
 extern crate mime_guess;
 extern crate proc_macro2;
+extern crate syn;
 extern crate walkdir;
 
 use failure::*;
@@ -15,11 +14,6 @@ use std::collections::BTreeSet;
 use std::path::PathBuf;
 use syn::parse::{Parse, ParseStream};
 use syn::{parse_macro_input, Ident, LitStr, Token};
-
-// use std::env;
-// use std::convert::AsRef;
-// use std::path::Path;
-// use failure::Error;
 
 struct Input {
     name: syn::Ident,
