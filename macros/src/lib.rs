@@ -10,7 +10,7 @@ extern crate walkdir;
 use failure::*;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 use std::path::PathBuf;
 use syn::parse::{Parse, ParseStream};
 use syn::{parse_macro_input, Ident, LitStr, Token};
@@ -32,13 +32,12 @@ impl Parse for Input {
         Ok(Input { name, path })
     }
 }
-fn root_dir() -> PathBuf {
-    std::env::var("CARGO_MANIFEST_DIR")
-        .unwrap_or_else(|_| {
-            eprintln!("Environment variable $CARGO_MANIFEST_DIR not set, assuming \".\"");
-            ".".into()
-        })
-        .into()
+fn root_dir() -> Result<PathBuf, Error> {
+    let base = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| {
+        eprintln!("Environment variable $CARGO_MANIFEST_DIR not set, assuming \".\"");
+        ".".into()
+    });
+    Ok(PathBuf::from(base).canonicalize()?)
 }
 
 #[proc_macro]
@@ -51,28 +50,34 @@ pub fn static_assets(input: proc_macro::TokenStream) -> proc_macro::TokenStream 
 fn generate(input: Input) -> Result<TokenStream, Error> {
     let Input { name, path } = input;
 
-    let dir = root_dir().join(path.value());
+    let dir = root_dir()?.join(path.value());
 
-    let mut files = BTreeMap::new();
+    let mut files = BTreeSet::new();
     for entry in walkdir::WalkDir::new(&dir) {
         let entry = entry?;
         eprintln!("Path: {:?}", (entry.file_type(), entry.path()));
 
         if entry.file_type().is_file() {
-            let name = entry
-                .path()
-                .strip_prefix(&dir)
-                .context("Removing path prefix")?
-                .to_str()
-                .ok_or_else(|| failure::err_msg(format!("Path for {:?}", entry)))?;
-            ;
-            files.insert(name.to_string(), ());
+            let name = entry.path().to_path_buf();
+            files.insert(name);
         }
     }
 
     let mut members = TokenStream::new();
-    for (name, data) in files {
-        quote!((#name, ()),).to_tokens(&mut members)
+    for path in files {
+        let pathname = path
+            .to_str()
+            .ok_or_else(|| failure::err_msg(format!("Path for {:?}", path)))?;
+        let asset = quote!(::static_assets::Asset {
+            content: include_bytes!(#pathname),
+        });
+        let name = path
+            .strip_prefix(&dir)
+            .context("Removing path prefix")?
+            .to_str()
+            .ok_or_else(|| failure::err_msg(format!("Path for {:?}", path)))?;
+
+        quote!((#name, #asset),).to_tokens(&mut members)
     }
 
     let out = quote!(
