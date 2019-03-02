@@ -2,11 +2,13 @@ extern crate failure;
 extern crate proc_macro;
 #[macro_use]
 extern crate quote;
+extern crate blake2;
 extern crate mime_guess;
 extern crate proc_macro2;
 extern crate syn;
 extern crate walkdir;
 
+use blake2::{Blake2b, Digest};
 use failure::*;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
@@ -70,10 +72,19 @@ fn generate(input: Input) -> Result<TokenStream, Error> {
 
         let content_type = mime_guess::guess_mime_type(&path).to_string();
 
+        let mut hasher = Blake2b::default();
+        hasher.input(std::fs::read(&path)?);
+        let digest_bytes = hasher
+            .result()
+            .iter()
+            .map(|b| quote!(#b,))
+            .collect::<TokenStream>();
+
         let asset = quote!(::static_assets::Asset {
             name: #name,
             content: include_bytes!(#pathname),
             content_type: #content_type,
+            digest: &[#digest_bytes],
         });
 
         quote!(#asset,).to_tokens(&mut members)

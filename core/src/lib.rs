@@ -3,6 +3,7 @@ pub struct Asset<'a> {
     pub name: &'a str,
     pub content: &'a [u8],
     pub content_type: &'a str,
+    pub digest: &'a [u8],
 }
 
 pub struct Map<'a> {

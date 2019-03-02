@@ -32,3 +32,15 @@ fn supports_iterators_non_trivially() {
         names
     );
 }
+
+#[test]
+fn should_have_relatively_unique_digests() {
+    for a in assets.iter() {
+        for b in assets.iter().filter(|b| a.name != b.name) {
+            assert_ne!(a.digest, b.digest, "Digest for {:?} vs {:?}", a, b)
+        }
+    }
+    let res = assets.get("canary.html").expect("asset canary.html");
+
+    assert_eq!(res.content_type, "text/html");
+}
