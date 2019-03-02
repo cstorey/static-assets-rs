@@ -77,11 +77,12 @@ fn generate(input: Input) -> Result<TokenStream, Error> {
         let content_type = mime_guess::guess_mime_type(&path).to_string();
 
         let asset = quote!(::static_assets::Asset {
+            name: #name,
             content: include_bytes!(#pathname),
             content_type: #content_type,
         });
 
-        quote!((#name, #asset),).to_tokens(&mut members)
+        quote!(#asset,).to_tokens(&mut members)
     }
 
     let out = quote!(
