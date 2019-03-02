@@ -1,5 +1,6 @@
 pub struct Asset<'a> {
     pub content: &'a [u8],
+    pub content_type: &'a str,
 }
 
 pub struct Map<'a> {

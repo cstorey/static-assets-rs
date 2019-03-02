@@ -4,6 +4,7 @@ extern crate proc_macro;
 extern crate quote;
 #[macro_use]
 extern crate syn;
+extern crate mime_guess;
 extern crate proc_macro2;
 extern crate walkdir;
 
@@ -55,7 +56,6 @@ fn generate(input: Input) -> Result<TokenStream, Error> {
     let mut files = BTreeSet::new();
     for entry in walkdir::WalkDir::new(&dir) {
         let entry = entry?;
-        eprintln!("Path: {:?}", (entry.file_type(), entry.path()));
 
         if entry.file_type().is_file() {
             let name = entry.path().to_path_buf();
@@ -68,14 +68,18 @@ fn generate(input: Input) -> Result<TokenStream, Error> {
         let pathname = path
             .to_str()
             .ok_or_else(|| failure::err_msg(format!("Path for {:?}", path)))?;
-        let asset = quote!(::static_assets::Asset {
-            content: include_bytes!(#pathname),
-        });
         let name = path
             .strip_prefix(&dir)
             .context("Removing path prefix")?
             .to_str()
             .ok_or_else(|| failure::err_msg(format!("Path for {:?}", path)))?;
+
+        let content_type = mime_guess::guess_mime_type(&path).to_string();
+
+        let asset = quote!(::static_assets::Asset {
+            content: include_bytes!(#pathname),
+            content_type: #content_type,
+        });
 
         quote!((#name, #asset),).to_tokens(&mut members)
     }
@@ -83,8 +87,6 @@ fn generate(input: Input) -> Result<TokenStream, Error> {
     let out = quote!(
         static #name : ::static_assets::Map<'static> = ::static_assets::Map{ members: &[#members]};
     );
-
-    eprintln!("Out: {}", out);
 
     Ok(out)
 }

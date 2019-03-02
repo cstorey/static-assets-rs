@@ -9,3 +9,10 @@ fn should_lookup_example() {
 
     assert_eq!(res.content, b"console.log(\"Hi\")");
 }
+
+#[test]
+fn should_have_content_type() {
+    let res = assets.get("canary.html").expect("asset canary.html");
+
+    assert_eq!(res.content_type, "text/html");
+}
