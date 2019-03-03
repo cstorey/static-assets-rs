@@ -9,6 +9,8 @@ warp = "0.1.13"
 static-assets = { version = "^0.1", path = "../core" }
 bytes = "0.4.11"
 mime = "0.3.13"
+base64 = "0.10.1"
+futures = "0.1.25"
 
 [dev-dependencies]
 static-assets-macros = { version = "^0.1", path = "../macros" }

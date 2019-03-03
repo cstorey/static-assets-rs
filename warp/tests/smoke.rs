@@ -14,6 +14,8 @@ fn test_response() {
     let filter = static_assets_warp::assets(&assets);
 
     let value = warp::test::request().path("/canary.html").reply(&filter);
+    assert_eq!(value.status(), warp::http::StatusCode::OK);
+
     assert_eq!(value.body(), &Bytes::from(&b"<p>Hi!</p>\n"[..]));
 }
 
@@ -36,4 +38,20 @@ fn test_has_content_type() {
         content_type,
         parsed
     )
+}
+
+#[test]
+fn test_has_revalidation() {
+    let filter = static_assets_warp::assets(&assets);
+
+    let orig = warp::test::request().path("/canary.html").reply(&filter);
+    eprintln!("Orig headers: {:?}", orig.headers());
+    let etag = orig.headers().get("etag").expect("entity tag value");
+
+    let revalidated = warp::test::request()
+        .path("/canary.html")
+        .header("If-None-Match", etag)
+        .reply(&filter);
+
+    assert_eq!(revalidated.status(), warp::http::StatusCode::NOT_MODIFIED)
 }
