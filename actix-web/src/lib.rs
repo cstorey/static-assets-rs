@@ -30,7 +30,9 @@ impl<S> Handler<S> for Static {
         info!("Path: {:?}; tail: {:?}", req.path(), path);
 
         if let Some(asset) = self.assets.get(&path) {
-            let resp = HttpResponse::Ok().body(asset.content);
+            let resp = HttpResponse::Ok()
+                .content_type(asset.content_type)
+                .body(asset.content);
             Ok(resp)
         } else {
             warn!("No match for path: {:?}", path);
