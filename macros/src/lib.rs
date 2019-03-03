@@ -8,7 +8,7 @@ extern crate proc_macro2;
 extern crate syn;
 extern crate walkdir;
 
-use blake2::{Blake2b, Digest};
+use blake2::{Blake2s, Digest};
 use failure::*;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
@@ -72,7 +72,7 @@ fn generate(input: Input) -> Result<TokenStream, Error> {
 
         let content_type = mime_guess::guess_mime_type(&path).to_string();
 
-        let mut hasher = Blake2b::default();
+        let mut hasher = Blake2s::default();
         hasher.input(std::fs::read(&path)?);
         let digest_bytes = hasher
             .result()
