@@ -6,3 +6,9 @@ edition = "2018"
 
 [dependencies]
 actix-web = "0.7"
+static-assets = { version = "^0.1", path = "../core" }
+log = "0.4.6"
+[dev-dependencies]
+static-assets-macros = { version = "^0.1", path = "../macros" }
+env_logger = "0.6.0"
+log = "0.4.6"
