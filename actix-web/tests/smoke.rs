@@ -69,3 +69,30 @@ fn should_serve_content_type() {
         (mime::TEXT, mime::HTML)
     );
 }
+
+#[test]
+fn should_serve_with_revalidation() {
+    env_logger::try_init().unwrap_or_default();
+
+    let mut srv = test::TestServer::with_factory(|| {
+        info!("Build app");
+        App::new().handler("/s/", Static::new(&assets))
+    });
+    let req = srv
+        .client(http::Method::GET, "/s/canary.html")
+        .finish()
+        .unwrap();
+    let response = srv.execute(req.send()).unwrap();
+    let etag = response
+        .headers()
+        .get(actix_web::http::header::ETAG)
+        .expect("ETag response header");
+
+    let req = srv
+        .client(http::Method::GET, "/s/canary.html")
+        .set_header(actix_web::http::header::IF_NONE_MATCH, etag.clone())
+        .finish()
+        .unwrap();
+    let response = srv.execute(req.send()).unwrap();
+    assert_eq!(response.status(), actix_web::http::StatusCode::NOT_MODIFIED);
+}

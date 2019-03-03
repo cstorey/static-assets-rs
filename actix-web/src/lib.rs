@@ -3,7 +3,7 @@ extern crate static_assets;
 extern crate log;
 
 use actix_web::dev::Handler;
-use actix_web::{HttpRequest, HttpResponse};
+use actix_web::{http, HttpRequest, HttpResponse};
 
 use static_assets::Map;
 
@@ -28,15 +28,34 @@ impl<S> Handler<S> for Static {
         let path = tail.trim_start_matches('/');
 
         info!("Path: {:?}; tail: {:?}", req.path(), path);
+        let asset = match self.assets.get(&path) {
+            Some(asset) => asset,
+            None => {
+                warn!("No match for path: {:?}", path);
+                return Ok(HttpResponse::NotFound().finish());
+            }
+        };
 
-        if let Some(asset) = self.assets.get(&path) {
+        let etag = format!(
+            "\"{}\"",
+            base64::encode_config(asset.digest, base64::URL_SAFE_NO_PAD)
+        );
+
+        let not_modified = req
+            .headers()
+            .get(http::header::IF_NONE_MATCH)
+            .and_then(|val| val.to_str().ok())
+            .map(|val| val == etag)
+            .unwrap_or(false);
+
+        if not_modified {
+            Ok(HttpResponse::NotModified().finish())
+        } else {
             let resp = HttpResponse::Ok()
                 .content_type(asset.content_type)
+                .header(http::header::ETAG, etag)
                 .body(asset.content);
             Ok(resp)
-        } else {
-            warn!("No match for path: {:?}", path);
-            Ok(HttpResponse::NotFound().finish())
         }
     }
 }
