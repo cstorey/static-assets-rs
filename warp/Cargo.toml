@@ -8,6 +8,7 @@ edition = "2018"
 warp = "0.1.13"
 static-assets = { version = "^0.1", path = "../core" }
 bytes = "0.4.11"
+mime = "0.3.13"
 
 [dev-dependencies]
 static-assets-macros = { version = "^0.1", path = "../macros" }

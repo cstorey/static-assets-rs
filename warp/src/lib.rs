@@ -10,7 +10,7 @@ fn asset_maybe(
 ) -> Result<impl warp::Reply, warp::Rejection> {
     assets
         .get(path)
-        .map(|a| a.content)
+        .map(|a| warp::reply::with_header(a.content, "content-type", a.content_type))
         .ok_or_else(warp::reject::not_found)
 }
 

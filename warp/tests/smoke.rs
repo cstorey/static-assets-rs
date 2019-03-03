@@ -1,9 +1,11 @@
 #[macro_use]
 extern crate static_assets_macros;
 extern crate bytes;
+extern crate mime;
 extern crate static_assets_warp;
 
 use bytes::Bytes;
+use std::str::FromStr;
 
 static_assets!(assets, "tests/assets");
 
@@ -11,7 +13,27 @@ static_assets!(assets, "tests/assets");
 fn test_response() {
     let filter = static_assets_warp::assets(&assets);
 
-    // Execute `sum` and get the `Extract` back.
     let value = warp::test::request().path("/canary.html").reply(&filter);
     assert_eq!(value.body(), &Bytes::from(&b"<p>Hi!</p>\n"[..]));
+}
+
+#[test]
+fn test_has_content_type() {
+    let filter = static_assets_warp::assets(&assets);
+
+    let value = warp::test::request().path("/canary.html").reply(&filter);
+    let content_type = value
+        .headers()
+        .get("content-type")
+        .expect("content-type value")
+        .to_str()
+        .expect("Convert header value to string");
+    let parsed = mime::Mime::from_str(content_type).expect("parse content type");
+    assert_eq!(
+        (parsed.type_(), parsed.subtype()),
+        (mime::TEXT, mime::HTML),
+        "Content type {:?} (parsed as {:?}) should be text/html",
+        content_type,
+        parsed
+    )
 }
