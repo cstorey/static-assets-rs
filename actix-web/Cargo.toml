@@ -1,0 +1,8 @@
+[package]
+name = "static-assets-actix"
+version = "0.1.0"
+authors = ["Ceri Storey <cez@necrofish.org.uk>"]
+edition = "2018"
+
+[dependencies]
+actix-web = "0.7"
