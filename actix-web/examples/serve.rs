@@ -5,28 +5,29 @@ extern crate actix_web;
 extern crate env_logger;
 extern crate static_assets_actix;
 
-use actix_web::{http, server, App, HttpRequest, HttpResponse};
+use actix_web::{http, web, App, HttpResponse, HttpServer};
 
 use static_assets_actix::Static;
 
 static_assets!(ASSETS, "examples/assets");
 
-fn index(_req: &HttpRequest) -> HttpResponse {
+fn index() -> HttpResponse {
     HttpResponse::SeeOther()
         .header(http::header::LOCATION, "/index.html")
         .finish()
 }
 
-fn main() {
+fn main() -> Result<(), std::io::Error> {
     env_logger::init();
 
-    let s = server::new(|| {
+    let s = HttpServer::new(|| {
         App::new()
-            .resource("/", |r| r.f(index))
-            .handler("/", Static::new(&ASSETS))
+            .route("/", web::get().to(index))
+            .default_service(Static::new(&ASSETS))
     })
     .bind("0.0.0.0:8088")
     .unwrap();
     println!("{:?}", s.addrs());
-    s.run();
+    s.run()?;
+    Ok(())
 }

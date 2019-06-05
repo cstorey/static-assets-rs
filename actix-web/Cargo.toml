@@ -10,6 +10,8 @@ static-assets = { version = "^0.1", path = "../core" }
 log = "0.4.6"
 mime = "0.3.13"
 base64 = "0.10.1"
+futures = "0.1.27"
+actix-service = "0.4.0"
 [dev-dependencies]
 static-assets-macros = { version = "^0.1", path = "../macros" }
 env_logger = "0.6.0"
