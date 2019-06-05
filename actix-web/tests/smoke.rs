@@ -9,7 +9,7 @@ extern crate mime;
 use actix_web::{http, test, App, HttpMessage};
 use static_assets_actix::Static;
 
-static_assets!(assets, "../macros/tests/assets");
+static_assets!(ASSETS, "../macros/tests/assets");
 
 #[test]
 fn should_serve_asset_content() {
@@ -17,7 +17,7 @@ fn should_serve_asset_content() {
 
     let mut srv = test::TestServer::with_factory(|| {
         info!("Build app");
-        App::new().handler("/s/", Static::new(&assets))
+        App::new().handler("/s/", Static::new(&ASSETS))
     });
     let req = srv
         .client(http::Method::GET, "/s/canary.html")
@@ -37,7 +37,7 @@ fn should_serve_404() {
 
     let mut srv = test::TestServer::with_factory(|| {
         info!("Build app");
-        App::new().handler("/s/", Static::new(&assets))
+        App::new().handler("/s/", Static::new(&ASSETS))
     });
     let req = srv
         .client(http::Method::GET, "/s/garbage")
@@ -53,7 +53,7 @@ fn should_serve_content_type() {
 
     let mut srv = test::TestServer::with_factory(|| {
         info!("Build app");
-        App::new().handler("/s/", Static::new(&assets))
+        App::new().handler("/s/", Static::new(&ASSETS))
     });
     let req = srv
         .client(http::Method::GET, "/s/canary.html")
@@ -76,7 +76,7 @@ fn should_serve_with_revalidation() {
 
     let mut srv = test::TestServer::with_factory(|| {
         info!("Build app");
-        App::new().handler("/s/", Static::new(&assets))
+        App::new().handler("/s/", Static::new(&ASSETS))
     });
     let req = srv
         .client(http::Method::GET, "/s/canary.html")

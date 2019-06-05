@@ -9,7 +9,7 @@ use actix_web::{http, server, App, HttpRequest, HttpResponse};
 
 use static_assets_actix::Static;
 
-static_assets!(assets, "examples/assets");
+static_assets!(ASSETS, "examples/assets");
 
 fn index(_req: &HttpRequest) -> HttpResponse {
     HttpResponse::SeeOther()
@@ -23,7 +23,7 @@ fn main() {
     let s = server::new(|| {
         App::new()
             .resource("/", |r| r.f(index))
-            .handler("/", Static::new(&assets))
+            .handler("/", Static::new(&ASSETS))
     })
     .bind("0.0.0.0:8088")
     .unwrap();
