@@ -5,6 +5,7 @@ extern crate actix_web;
 extern crate env_logger;
 extern crate static_assets_actix;
 
+use actix_web::middleware::Logger;
 use actix_web::{http, web, App, HttpResponse, HttpServer};
 
 use static_assets_actix::Static;
@@ -24,6 +25,7 @@ fn main() -> Result<(), std::io::Error> {
         App::new()
             .route("/", web::get().to(index))
             .default_service(Static::new(&ASSETS))
+            .wrap(Logger::default())
     })
     .bind("0.0.0.0:8088")
     .unwrap();

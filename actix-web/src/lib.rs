@@ -14,6 +14,8 @@ use futures::{
 
 use static_assets::Map;
 
+const ETAG_STRING_SIZE: usize = 45;
+
 #[derive(Clone)]
 pub struct Static {
     assets: &'static Map<'static>,
@@ -30,19 +32,25 @@ impl Static {
         let tail = req.match_info().unprocessed();
         let path = tail.trim_start_matches('/');
 
-        info!("Path: {:?}; tail: {:?}", req.path(), path);
+        trace!("Path: {:?}; tail: {:?}", req.path(), path);
         let asset = match self.assets.get(&path) {
             Some(asset) => asset,
             None => {
-                warn!("No match for path: {:?}", path);
+                debug!("No match for path: {:?}", path);
                 return Ok(HttpResponse::NotFound().finish());
             }
         };
 
-        let etag = format!(
-            "\"{}\"",
-            base64::encode_config(asset.digest, base64::URL_SAFE_NO_PAD)
-        );
+        let etag = {
+            let mut buf = String::with_capacity(ETAG_STRING_SIZE);
+            buf.push('"');
+            buf.push_str(&base64::encode_config(
+                asset.digest,
+                base64::URL_SAFE_NO_PAD,
+            ));
+            buf.push('"');
+            buf
+        };
 
         let not_modified = req
             .headers()
