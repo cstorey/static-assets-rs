@@ -14,6 +14,8 @@ use futures::{
 
 use static_assets::Map;
 
+const ETAG_STRING_SIZE: usize = 45;
+
 #[derive(Clone)]
 pub struct Static {
     assets: &'static Map<'static>,
@@ -39,10 +41,16 @@ impl Static {
             }
         };
 
-        let etag = format!(
-            "\"{}\"",
-            base64::encode_config(asset.digest, base64::URL_SAFE_NO_PAD)
-        );
+        let etag = {
+            let mut buf = String::with_capacity(ETAG_STRING_SIZE);
+            buf.push('"');
+            buf.push_str(&base64::encode_config(
+                asset.digest,
+                base64::URL_SAFE_NO_PAD,
+            ));
+            buf.push('"');
+            buf
+        };
 
         let not_modified = req
             .headers()
