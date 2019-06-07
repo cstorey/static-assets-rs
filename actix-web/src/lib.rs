@@ -30,11 +30,11 @@ impl Static {
         let tail = req.match_info().unprocessed();
         let path = tail.trim_start_matches('/');
 
-        info!("Path: {:?}; tail: {:?}", req.path(), path);
+        trace!("Path: {:?}; tail: {:?}", req.path(), path);
         let asset = match self.assets.get(&path) {
             Some(asset) => asset,
             None => {
-                warn!("No match for path: {:?}", path);
+                debug!("No match for path: {:?}", path);
                 return Ok(HttpResponse::NotFound().finish());
             }
         };
