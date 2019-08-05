@@ -70,7 +70,7 @@ fn generate(input: Input) -> Result<TokenStream, Error> {
             .to_str()
             .ok_or_else(|| failure::err_msg(format!("Path for {:?}", path)))?;
 
-        let content_type = mime_guess::guess_mime_type(&path).to_string();
+        let content_type = mime_guess::from_path(&path).first_or_octet_stream().to_string();
 
         let mut hasher = Blake2s::default();
         hasher.input(std::fs::read(&path)?);
