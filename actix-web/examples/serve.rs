@@ -5,6 +5,7 @@ extern crate actix_web;
 extern crate env_logger;
 extern crate static_assets_actix;
 
+use actix_rt;
 use actix_web::middleware::Logger;
 use actix_web::{http, web, App, HttpResponse, HttpServer};
 
@@ -18,7 +19,8 @@ fn index() -> HttpResponse {
         .finish()
 }
 
-fn main() -> Result<(), std::io::Error> {
+#[actix_rt::main]
+async fn main() -> Result<(), std::io::Error> {
     env_logger::init();
 
     let s = HttpServer::new(|| {
@@ -30,6 +32,6 @@ fn main() -> Result<(), std::io::Error> {
     .bind("0.0.0.0:8088")
     .unwrap();
     println!("{:?}", s.addrs());
-    s.run()?;
+    s.run().await?;
     Ok(())
 }
