@@ -5,7 +5,7 @@ authors = ["Ceri Storey <cez@necrofish.org.uk>"]
 edition = "2018"
 
 [dependencies]
-actix-web = "1.0"
+actix-web = "2.0"
 static-assets = { version = "^0.1", path = "../core" }
 log = "0.4.6"
 mime = "0.3.13"
