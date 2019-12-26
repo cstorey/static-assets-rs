@@ -2,15 +2,12 @@ extern crate static_assets;
 #[macro_use]
 extern crate log;
 
-// use actix_web::dev::Handler;
+use std::task::{Context, Poll};
 
-use actix_service::NewService;
-use actix_web::dev::*;
+use actix_service::{Service, ServiceFactory};
+use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::{http, HttpRequest, HttpResponse};
-use futures::{
-    future::{ok, result, FutureResult},
-    Async,
-};
+use futures::future::{ok, ready, Ready};
 
 use static_assets::Map;
 
@@ -74,31 +71,31 @@ impl Service for Static {
     type Request = ServiceRequest;
     type Response = ServiceResponse;
     type Error = actix_web::error::Error;
-    type Future = FutureResult<ServiceResponse, actix_web::error::Error>;
+    type Future = Ready<Result<ServiceResponse, actix_web::error::Error>>;
 
-    fn poll_ready(&mut self) -> Result<Async<()>, Self::Error> {
-        Ok(Async::Ready(()))
+    fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        Poll::Ready(Ok(()))
     }
 
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
         let (httpreq, _) = req.into_parts();
-        result(
+        ready(
             self.handle(httpreq.clone())
                 .map(|rsp| ServiceResponse::new(httpreq, rsp)),
         )
     }
 }
 
-impl NewService for Static {
+impl ServiceFactory for Static {
     type Request = ServiceRequest;
     type Response = ServiceResponse;
     type Error = actix_web::error::Error;
-    type Future = FutureResult<Self, actix_web::error::Error>;
+    type Future = Ready<Result<Self, actix_web::error::Error>>;
     type Service = Self;
     type Config = ();
     type InitError = actix_web::error::Error;
 
-    fn new_service(&self, _cfg: &Self::Config) -> Self::Future {
+    fn new_service(&self, _cfg: Self::Config) -> Self::Future {
         ok(self.clone())
     }
 }
