@@ -73,9 +73,9 @@ fn generate(input: Input) -> Result<TokenStream, Error> {
         let content_type = mime_guess::from_path(&path).first_or_octet_stream().to_string();
 
         let mut hasher = Blake2s::default();
-        hasher.input(std::fs::read(&path)?);
+        hasher.update(std::fs::read(&path)?);
         let digest_bytes = hasher
-            .result()
+            .finalize()
             .iter()
             .map(|b| quote!(#b,))
             .collect::<TokenStream>();
