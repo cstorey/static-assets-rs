@@ -5,7 +5,6 @@ extern crate actix_web;
 extern crate env_logger;
 extern crate static_assets_actix;
 
-use actix_rt;
 use actix_web::middleware::Logger;
 use actix_web::{http, web, App, HttpResponse, HttpServer};
 
