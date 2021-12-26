@@ -30,7 +30,7 @@ impl Static {
         let path = tail.trim_start_matches('/');
 
         trace!("Path: {:?}; tail: {:?}", req.path(), path);
-        let asset = match self.assets.get(&path) {
+        let asset = match self.assets.get(path) {
             Some(asset) => asset,
             None => {
                 debug!("No match for path: {:?}", path);

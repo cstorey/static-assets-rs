@@ -29,6 +29,6 @@ impl<'a> Iterator for MapIter<'a> {
     type Item = Asset<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.0.next().map(|a| a.clone())
+        self.0.next().cloned()
     }
 }

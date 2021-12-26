@@ -5,7 +5,6 @@ extern crate env_logger;
 extern crate log;
 extern crate mime;
 
-use actix_rt;
 use actix_service::Service;
 use actix_web::{http, test};
 use static_assets_actix::Static;
