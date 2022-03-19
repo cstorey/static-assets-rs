@@ -8,7 +8,7 @@ extern crate proc_macro2;
 extern crate syn;
 extern crate walkdir;
 
-use blake2::{Digest, Blake2s256};
+use blake2::{Blake2s256, Digest};
 use failure::*;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
@@ -70,7 +70,9 @@ fn generate(input: Input) -> Result<TokenStream, Error> {
             .to_str()
             .ok_or_else(|| failure::err_msg(format!("Path for {:?}", path)))?;
 
-        let content_type = mime_guess::from_path(&path).first_or_octet_stream().to_string();
+        let content_type = mime_guess::from_path(&path)
+            .first_or_octet_stream()
+            .to_string();
 
         let mut hasher = Blake2s256::default();
         hasher.update(std::fs::read(&path)?);
