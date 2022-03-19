@@ -2,7 +2,7 @@ use blake2::{Blake2s256, Digest};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use std::collections::BTreeSet;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use syn::parse::{Parse, ParseStream};
 use syn::{parse_macro_input, Ident, LitStr, Token};
 use thiserror::Error;
@@ -41,15 +41,13 @@ fn root_dir() -> Result<PathBuf, Error> {
 
 #[proc_macro]
 pub fn static_assets(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let input = parse_macro_input!(input as Input);
+    let Input { name, path } = parse_macro_input!(input as Input);
 
-    generate(input).expect("generate").into()
+    generate(name, path.value().as_ref()).expect("generate").into()
 }
 
-fn generate(input: Input) -> Result<TokenStream, Error> {
-    let Input { name, path } = input;
-
-    let dir = root_dir()?.join(path.value());
+fn generate(name: syn::Ident, path: &Path) -> Result<TokenStream, Error> {
+    let dir = root_dir()?.join(path);
 
     let mut files = BTreeSet::new();
     for entry in walkdir::WalkDir::new(&dir) {
