@@ -3,6 +3,7 @@ use hyper::{Body, Request, StatusCode};
 use tower::ServiceExt;
 
 use static_assets_hyper::{static_assets, StaticService};
+use typed_headers::{ContentType, HeaderMapExt};
 
 static_assets!(ASSETS, "../macros/tests/assets");
 
@@ -37,6 +38,28 @@ async fn should_serve_404_when_missing() -> Result<()> {
     let (parts, _) = resp.into_parts();
 
     assert_eq!(parts.status, StatusCode::NOT_FOUND);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_serve_content_type() -> Result<()> {
+    env_logger::try_init().unwrap_or_default();
+
+    let srv = StaticService::new(&ASSETS);
+    let req = Request::builder().uri("/canary.html").body(Body::empty())?;
+    let resp = srv.oneshot(req).await.context("Fetch response")?;
+    let (parts, _) = resp.into_parts();
+
+    let content_type = parts
+        .headers
+        .typed_get::<ContentType>()
+        .expect("content-type header decode")
+        .expect("some content-type header");
+    assert_eq!(
+        (content_type.type_(), content_type.subtype()),
+        (mime::TEXT, mime::HTML)
+    );
 
     Ok(())
 }

@@ -1,7 +1,7 @@
 use std::task;
 
 use futures::future;
-use hyper::{http, service::Service, Body, Request, Response, StatusCode};
+use hyper::{header::CONTENT_TYPE, http, service::Service, Body, Request, Response, StatusCode};
 use log::{debug, trace};
 use static_assets::Map;
 
@@ -43,6 +43,9 @@ impl Service<Request<Body>> for StaticService {
             }
         };
 
-        future::ready(Response::builder().body(Body::from(asset.content)))
+        let resp = Response::builder()
+            .header(CONTENT_TYPE, asset.content_type)
+            .body(Body::from(asset.content));
+        future::ready(resp)
     }
 }
