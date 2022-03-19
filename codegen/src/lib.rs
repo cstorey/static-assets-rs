@@ -1,7 +1,9 @@
 use blake2::{Blake2s256, Digest};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
+use syn::parse_quote;
 use std::collections::BTreeSet;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
@@ -15,6 +17,10 @@ pub enum Error {
     NonUtf8Path(PathBuf),
     #[error("Expected directory {0} to contain found file {1}")]
     FoundFileNotInSourceDirectory(PathBuf, PathBuf),
+    #[error("Cannot find parent directory for target: {0}")]
+    NoParentDirectory(PathBuf),
+    #[error("Persisting temporary file")]
+    PersistTempFile(#[from] tempfile::PersistError),
 }
 
 fn root_dir() -> Result<PathBuf, Error> {
@@ -80,4 +86,27 @@ pub fn generate(
     );
 
     Ok(out)
+}
+
+pub fn generate_to_file(
+    visibility: syn::Visibility,
+    name: syn::Ident,
+    assets_path: &std::path::Path,
+    target: PathBuf,
+) -> Result<(), Error> {
+    let dir = target
+        .parent()
+        .ok_or_else(|| Error::NoParentDirectory(target.to_owned()))?;
+
+    let mut tmpf = tempfile::NamedTempFile::new_in(dir)?;
+
+    let content = generate(visibility, name, assets_path)?;
+    tmpf.write_all(
+        prettyplease::unparse(&parse_quote!(
+            #content
+        ))
+        .as_bytes(),
+    )?;
+    tmpf.persist(&target)?;
+    Ok(())
 }
