@@ -6,3 +6,10 @@ edition = "2021"
 workspace = "../"
 
 [dependencies]
+quote = "1.0.0"
+syn = "1.0.1"
+walkdir = "2.2.7"
+proc-macro2 = "1.0.0"
+mime_guess = "2.0.0"
+blake2 = "0.10.0"
+thiserror = "1.0.30"

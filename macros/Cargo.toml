@@ -17,4 +17,4 @@ walkdir = "2.2.7"
 proc-macro2 = "1.0.0"
 mime_guess = "2.0.0"
 blake2 = "0.10.0"
-thiserror = "1.0.30"
+static-assets-codegen = { version = "0.1.0", path = "../codegen" }
