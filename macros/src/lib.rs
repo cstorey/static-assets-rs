@@ -1,11 +1,23 @@
 use blake2::{Blake2s256, Digest};
-use failure::*;
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use std::collections::BTreeSet;
 use std::path::PathBuf;
 use syn::parse::{Parse, ParseStream};
 use syn::{parse_macro_input, Ident, LitStr, Token};
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+enum Error {
+    #[error("I/O")]
+    IO(#[from] std::io::Error),
+    #[error("Walking directory tree")]
+    WalkDir(#[from] walkdir::Error),
+    #[error("Non-utf8 path")]
+    NonUtf8Path(PathBuf),
+    #[error("Expected directory {0} to contain found file {1}")]
+    FoundFileNotInSourceDirectory(PathBuf, PathBuf),
+}
 
 struct Input {
     name: syn::Ident,
@@ -53,12 +65,12 @@ fn generate(input: Input) -> Result<TokenStream, Error> {
     for path in files {
         let pathname = path
             .to_str()
-            .ok_or_else(|| failure::err_msg(format!("Path for {:?}", path)))?;
+            .ok_or_else(|| Error::NonUtf8Path(path.to_owned()))?;
         let name = path
             .strip_prefix(&dir)
-            .context("Removing path prefix")?
+            .map_err(|_| Error::FoundFileNotInSourceDirectory(dir.to_owned(), path.to_owned()))?
             .to_str()
-            .ok_or_else(|| failure::err_msg(format!("Path for {:?}", path)))?;
+            .ok_or_else(|| Error::NonUtf8Path(path.to_owned()))?;
 
         let content_type = mime_guess::from_path(&path)
             .first_or_octet_stream()
