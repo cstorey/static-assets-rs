@@ -2,6 +2,7 @@
 members = [
   "core",
   "codegen",
+  "codegen-tests",
   "macros",
   "hyper",
 ]
