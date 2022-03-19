@@ -3,10 +3,20 @@ use std::collections::BTreeSet;
 use static_assets_macros::static_assets;
 
 static_assets!(ASSETS, "tests/assets");
+static_assets!(pub(crate) PUB_CRATE_ASSETS, "tests/assets");
 
 #[test]
 fn should_lookup_example() {
     let res = ASSETS.get("js/canary.js").expect("asset js/canary.js");
+
+    assert_eq!(res.content, b"console.log(\"Hi\")");
+}
+
+#[test]
+fn should_lookup_example_from_pub_crate() {
+    let res = PUB_CRATE_ASSETS
+        .get("js/canary.js")
+        .expect("asset js/canary.js");
 
     assert_eq!(res.content, b"console.log(\"Hi\")");
 }

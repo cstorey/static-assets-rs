@@ -1,0 +1,18 @@
+[package]
+name = "static-assets-codegen-tests"
+version = "0.1.0"
+authors = ["Ceri Storey <cez@necrofish.org.uk>"]
+edition = "2021"
+workspace = "../"
+build = "build.rs"
+
+[build-dependencies]
+static-assets-codegen = { version = "0.1.0", path = "../codegen" }
+anyhow = "1.0.56"
+syn = "1.0.89"
+tempfile = "3.3.0"
+prettyplease = "0.1.7"
+
+[dependencies]
+static-assets = { version = "^0.1", path = "../core" }
+

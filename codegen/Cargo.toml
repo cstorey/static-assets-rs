@@ -1,15 +1,10 @@
 [package]
-name = "static-assets-macros"
+name = "static-assets-codegen"
 version = "0.1.0"
 authors = ["Ceri Storey <cez@necrofish.org.uk>"]
 edition = "2021"
 workspace = "../"
 
-[lib]
-proc-macro = true
-
-[dev-dependencies]
-static-assets = { version = "^0.1", path = "../core" }
 [dependencies]
 quote = "1.0.0"
 syn = "1.0.1"
@@ -17,4 +12,6 @@ walkdir = "2.2.7"
 proc-macro2 = "1.0.0"
 mime_guess = "2.0.0"
 blake2 = "0.10.0"
-static-assets-codegen = { version = "0.1.0", path = "../codegen" }
+thiserror = "1.0.30"
+tempfile = "3.3.0"
+prettyplease = "0.1.7"
