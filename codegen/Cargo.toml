@@ -1,0 +1,8 @@
+[package]
+name = "static-assets-codegen"
+version = "0.1.0"
+authors = ["Ceri Storey <cez@necrofish.org.uk>"]
+edition = "2021"
+workspace = "../"
+
+[dependencies]
