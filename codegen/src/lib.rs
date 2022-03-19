@@ -25,7 +25,11 @@ fn root_dir() -> Result<PathBuf, Error> {
     Ok(PathBuf::from(base).canonicalize()?)
 }
 
-pub fn generate(name: syn::Ident, path: &Path) -> Result<TokenStream, Error> {
+pub fn generate(
+    visibility: syn::Visibility,
+    name: syn::Ident,
+    path: &Path,
+) -> Result<TokenStream, Error> {
     let dir = root_dir()?.join(path);
 
     let mut files = BTreeSet::new();
@@ -72,7 +76,7 @@ pub fn generate(name: syn::Ident, path: &Path) -> Result<TokenStream, Error> {
     }
 
     let out = quote!(
-        static #name : ::static_assets::Map<'static> = ::static_assets::Map{ members: &[#members]};
+        #visibility static #name : ::static_assets::Map<'static> = ::static_assets::Map{ members: &[#members]};
     );
 
     Ok(out)
