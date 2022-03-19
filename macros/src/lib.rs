@@ -1,17 +1,7 @@
-extern crate failure;
-extern crate proc_macro;
-#[macro_use]
-extern crate quote;
-extern crate blake2;
-extern crate mime_guess;
-extern crate proc_macro2;
-extern crate syn;
-extern crate walkdir;
-
 use blake2::{Blake2s256, Digest};
 use failure::*;
 use proc_macro2::TokenStream;
-use quote::ToTokens;
+use quote::{quote, ToTokens};
 use std::collections::BTreeSet;
 use std::path::PathBuf;
 use syn::parse::{Parse, ParseStream};
