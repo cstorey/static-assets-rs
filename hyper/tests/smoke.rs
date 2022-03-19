@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use hyper::{Body, Request};
+use hyper::{Body, Request, StatusCode};
 use tower::ServiceExt;
 
 use static_assets_hyper::{static_assets, StaticService};
@@ -21,6 +21,22 @@ async fn should_serve_asset_content() -> Result<()> {
     let body = hyper::body::to_bytes(body).await.unwrap();
     let bodystr = std::str::from_utf8(&body).context("utf8 body")?;
     assert_eq!(bodystr, "<p>Hi!</p>\n");
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_serve_404_when_missing() -> Result<()> {
+    env_logger::try_init().unwrap_or_default();
+
+    let srv = StaticService::new(&ASSETS);
+    let req = Request::builder()
+        .uri("/not-an-asset")
+        .body(Body::empty())?;
+    let resp = srv.oneshot(req).await.context("Fetch response")?;
+    let (parts, _) = resp.into_parts();
+
+    assert_eq!(parts.status, StatusCode::NOT_FOUND);
 
     Ok(())
 }

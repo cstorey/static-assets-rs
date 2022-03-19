@@ -1,7 +1,7 @@
 use std::task;
 
 use futures::future;
-use hyper::{http, service::Service, Body, Request, Response};
+use hyper::{http, service::Service, Body, Request, Response, StatusCode};
 use log::{debug, trace};
 use static_assets::Map;
 
@@ -36,7 +36,10 @@ impl Service<Request<Body>> for StaticService {
             Some(asset) => asset,
             None => {
                 debug!("No match for path: {:?}", path);
-                todo!();
+                let resp = Response::builder()
+                    .status(StatusCode::NOT_FOUND)
+                    .body(Body::empty());
+                return future::ready(resp);
             }
         };
 
