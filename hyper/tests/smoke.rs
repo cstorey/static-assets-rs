@@ -1,5 +1,8 @@
 use anyhow::{Context, Result};
-use hyper::{Body, Request, StatusCode};
+use hyper::{
+    header::{ETAG, IF_NONE_MATCH},
+    Body, Request, StatusCode,
+};
 use tower::ServiceExt;
 
 use static_assets_hyper::{static_assets, StaticService};
@@ -60,6 +63,32 @@ async fn should_serve_content_type() -> Result<()> {
         (content_type.type_(), content_type.subtype()),
         (mime::TEXT, mime::HTML)
     );
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_serve_with_revalidation() -> Result<()> {
+    env_logger::try_init().unwrap_or_default();
+
+    let srv = StaticService::new(&ASSETS);
+    let req = Request::builder().uri("/canary.html").body(Body::empty())?;
+    let resp = srv.clone().oneshot(req).await.context("Fetch response")?;
+
+    let (parts, _) = resp.into_parts();
+    let entity_tag = parts.headers.get(ETAG).expect("some ETag header");
+
+    let mut req_builder = Request::builder().uri("/canary.html");
+    req_builder
+        .headers_mut()
+        .expect("valid builder")
+        .insert(IF_NONE_MATCH, entity_tag.clone());
+    let req = req_builder.body(Body::empty())?;
+
+    let resp = srv.oneshot(req).await.context("Fetch response")?;
+    let (parts, _) = resp.into_parts();
+
+    assert_eq!(parts.status, StatusCode::NOT_MODIFIED);
 
     Ok(())
 }

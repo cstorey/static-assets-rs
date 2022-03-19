@@ -1,12 +1,20 @@
 use std::task;
 
 use futures::future;
-use hyper::{header::CONTENT_TYPE, http, service::Service, Body, Request, Response, StatusCode};
+use hyper::{
+    header::{CONTENT_TYPE, ETAG},
+    http,
+    service::Service,
+    Body, Request, Response, StatusCode,
+};
 use log::{debug, trace};
 use static_assets::Map;
 
 pub use static_assets_macros::static_assets;
 
+const ETAG_STRING_SIZE: usize = 45;
+
+#[derive(Clone)]
 pub struct StaticService {
     assets: &'static Map<'static>,
 }
@@ -43,8 +51,31 @@ impl Service<Request<Body>> for StaticService {
             }
         };
 
+        let etag = {
+            let mut buf = String::with_capacity(ETAG_STRING_SIZE);
+            buf.push('"');
+            base64::encode_config_buf(asset.digest, base64::URL_SAFE_NO_PAD, &mut buf);
+            buf.push('"');
+            buf
+        };
+
+        let not_modified = req
+            .headers()
+            .get(http::header::IF_NONE_MATCH)
+            .and_then(|val| val.to_str().ok())
+            .map(|val| val == etag)
+            .unwrap_or(false);
+
+        if not_modified {
+            let resp = Response::builder()
+                .status(StatusCode::NOT_MODIFIED)
+                .body(Body::empty());
+            return future::ready(resp);
+        }
+
         let resp = Response::builder()
             .header(CONTENT_TYPE, asset.content_type)
+            .header(ETAG, etag)
             .body(Body::from(asset.content));
         future::ready(resp)
     }
