@@ -2,7 +2,7 @@
 name = "static-assets-hyper"
 version = "0.1.0"
 authors = ["Ceri Storey <cez@necrofish.org.uk>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 anyhow = { version = "1.0.56", features = [ "backtrace" ] }
