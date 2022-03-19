@@ -1,7 +1,6 @@
-#[macro_use]
-extern crate static_assets_macros;
-
 use std::collections::BTreeSet;
+
+use static_assets_macros::static_assets;
 
 static_assets!(ASSETS, "tests/assets");
 
