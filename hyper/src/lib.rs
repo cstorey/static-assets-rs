@@ -39,11 +39,11 @@ impl Service<Request<Body>> for StaticService {
     fn call(&mut self, req: Request<Body>) -> Self::Future {
         let path = req.uri().path();
         let tail = path.strip_prefix('/').unwrap_or(path);
-        trace!("Path: {:?}; tail: {:?}", path, tail);
+        trace!(?path, ?tail, "Paths");
         let asset = match self.assets.get(tail) {
             Some(asset) => asset,
             None => {
-                debug!("No match for path: {:?}", path);
+                debug!(?path, "No match for path");
                 let resp = Response::builder()
                     .status(StatusCode::NOT_FOUND)
                     .body(Body::empty());
