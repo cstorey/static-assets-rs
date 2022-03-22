@@ -9,7 +9,7 @@ static_assets!(ASSETS, "examples/assets");
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    env_logger::init();
+    tracing_subscriber::fmt::try_init().unwrap_or_default();
 
     let make_svc =
         make_service_fn(|_conn| async { Ok::<_, Infallible>(StaticService::new(&ASSETS)) });
