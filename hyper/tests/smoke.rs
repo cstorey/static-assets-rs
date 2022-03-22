@@ -4,7 +4,7 @@ use hyper::{
     header::{ETAG, IF_NONE_MATCH},
     Body, Request, StatusCode,
 };
-use log::warn;
+use tracing::warn;
 use tower::ServiceExt;
 
 use static_assets_hyper::{static_assets, StaticService};
@@ -14,7 +14,7 @@ static_assets!(ASSETS, "../macros/tests/assets");
 
 #[tokio::test]
 async fn should_serve_asset_content() -> Result<()> {
-    env_logger::try_init().unwrap_or_default();
+    tracing_subscriber::fmt::try_init().unwrap_or_default();
 
     let srv = StaticService::new(&ASSETS);
 
@@ -33,7 +33,7 @@ async fn should_serve_asset_content() -> Result<()> {
 
 #[tokio::test]
 async fn should_serve_404_when_missing() -> Result<()> {
-    env_logger::try_init().unwrap_or_default();
+    tracing_subscriber::fmt::try_init().unwrap_or_default();
 
     let srv = StaticService::new(&ASSETS);
     let req = Request::builder()
@@ -49,7 +49,7 @@ async fn should_serve_404_when_missing() -> Result<()> {
 
 #[tokio::test]
 async fn should_serve_content_type() -> Result<()> {
-    env_logger::try_init().unwrap_or_default();
+    tracing_subscriber::fmt::try_init().unwrap_or_default();
 
     let srv = StaticService::new(&ASSETS);
     let req = Request::builder().uri("/canary.html").body(Body::empty())?;
@@ -71,7 +71,7 @@ async fn should_serve_content_type() -> Result<()> {
 
 #[tokio::test]
 async fn should_serve_with_revalidation() -> Result<()> {
-    env_logger::try_init().unwrap_or_default();
+    tracing_subscriber::fmt::try_init().unwrap_or_default();
 
     let srv = StaticService::new(&ASSETS);
     let req = Request::builder().uri("/canary.html").body(Body::empty())?;
@@ -97,7 +97,7 @@ async fn should_serve_with_revalidation() -> Result<()> {
 
 #[tokio::test]
 async fn should_serve_nested_in_axum() -> Result<()> {
-    env_logger::try_init().unwrap_or_default();
+    tracing_subscriber::fmt::try_init().unwrap_or_default();
 
     let srv = StaticService::new(&ASSETS);
 
