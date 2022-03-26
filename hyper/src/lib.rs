@@ -7,8 +7,8 @@ use hyper::{
     service::Service,
     Body, Request, Response, StatusCode,
 };
-use tracing::{debug, trace};
 use static_assets::Map;
+use tracing::{debug, trace};
 
 pub use static_assets_macros::static_assets;
 
