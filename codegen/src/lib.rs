@@ -1,10 +1,10 @@
 use blake2::{Blake2s256, Digest};
-use proc_macro2::TokenStream;
+use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
 use std::collections::BTreeSet;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use syn::parse_quote;
+use syn::{parse_quote, LitByteStr};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -65,17 +65,13 @@ pub fn generate(
 
         let mut hasher = Blake2s256::default();
         hasher.update(std::fs::read(&path)?);
-        let digest_bytes = hasher
-            .finalize()
-            .iter()
-            .map(|b| quote!(#b,))
-            .collect::<TokenStream>();
+        let digest_string = LitByteStr::new(&hasher.finalize(), Span::mixed_site());
 
         let asset = quote!(::static_assets::Asset {
             name: #name,
             content: include_bytes!(#pathname),
             content_type: #content_type,
-            digest: &[#digest_bytes],
+            digest: #digest_string,
         });
 
         quote!(#asset,).to_tokens(&mut members)
