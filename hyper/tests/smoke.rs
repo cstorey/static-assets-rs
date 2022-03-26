@@ -4,8 +4,8 @@ use hyper::{
     header::{ETAG, IF_NONE_MATCH},
     Body, Request, StatusCode,
 };
-use tracing::warn;
 use tower::ServiceExt;
+use tracing::warn;
 
 use static_assets_hyper::{static_assets, StaticService};
 use typed_headers::{ContentType, HeaderMapExt};

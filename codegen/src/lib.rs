@@ -1,10 +1,10 @@
 use blake2::{Blake2s256, Digest};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::parse_quote;
 use std::collections::BTreeSet;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use syn::parse_quote;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
