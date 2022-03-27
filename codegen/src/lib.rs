@@ -1,9 +1,11 @@
+use std::collections::BTreeSet;
+use std::fs::read_to_string;
+use std::io::{ErrorKind, Write};
+use std::path::{Path, PathBuf};
+
 use blake2::{Blake2s256, Digest};
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use std::collections::BTreeSet;
-use std::io::Write;
-use std::path::{Path, PathBuf};
 use syn::{parse_quote, LitByteStr};
 use thiserror::Error;
 
@@ -90,19 +92,35 @@ pub fn generate_to_file(
     assets_path: &std::path::Path,
     target: PathBuf,
 ) -> Result<(), Error> {
+    let content = generate(visibility, name, assets_path)?;
+
+    write_file_if_changed(
+        &target,
+        &prettyplease::unparse(&parse_quote!(
+            #content
+        )),
+    )?;
+
+    Ok(())
+}
+
+fn write_file_if_changed(target: &Path, content: &str) -> Result<(), Error> {
+    match read_to_string(target) {
+        Ok(existing) => {
+            if existing == content {
+                return Ok(());
+            }
+        }
+        Err(error) if error.kind() == ErrorKind::NotFound => {}
+        Err(error) => return Err(Error::from(error)),
+    };
+
     let dir = target
         .parent()
-        .ok_or_else(|| Error::NoParentDirectory(target.to_owned()))?;
+        .ok_or_else(|| Error::NoParentDirectory(target.into()))?;
 
     let mut tmpf = tempfile::NamedTempFile::new_in(dir)?;
-
-    let content = generate(visibility, name, assets_path)?;
-    tmpf.write_all(
-        prettyplease::unparse(&parse_quote!(
-            #content
-        ))
-        .as_bytes(),
-    )?;
-    tmpf.persist(&target)?;
+    tmpf.write_all(content.as_bytes())?;
+    tmpf.persist(target)?;
     Ok(())
 }
