@@ -4,9 +4,9 @@ use std::io::{ErrorKind, Write};
 use std::path::{Path, PathBuf};
 
 use blake2::{Blake2s256, Digest};
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::{parse_quote, LitByteStr};
+use syn::parse_quote;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -67,13 +67,17 @@ pub fn generate(
 
         let mut hasher = Blake2s256::default();
         hasher.update(std::fs::read(&path)?);
-        let digest_string = LitByteStr::new(&hasher.finalize(), Span::mixed_site());
+        let digest_bytes = hasher
+            .finalize()
+            .iter()
+            .map(|b| quote!(#b,))
+            .collect::<TokenStream>();
 
         let asset = quote!(::static_assets::Asset {
             name: #name,
             content: include_bytes!(#pathname),
             content_type: #content_type,
-            digest: #digest_string,
+            digest: &[#digest_bytes],
         });
 
         quote!(#asset,).to_tokens(&mut members)
