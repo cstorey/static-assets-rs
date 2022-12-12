@@ -13,7 +13,7 @@ static-assets-macros = { version = "^0.1", path = "../macros" }
 futures = "0.3.21"
 tower-http = "0.3.0"
 tower = "0.4.12"
-base64 = "0.13.0"
+base64 = "0.20.0"
 tracing = "0.1.32"
 
 [dev-dependencies]
