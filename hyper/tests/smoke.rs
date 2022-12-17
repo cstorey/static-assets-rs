@@ -130,7 +130,7 @@ async fn should_serve_nested_in_axum() -> Result<()> {
 
     let srv = StaticService::new(&ASSETS);
 
-    let app = Router::new().nest(
+    let app = Router::new().nest_service(
         "/static",
         get_service(srv).handle_error(|error| async move {
             warn!("Error serving request: {}", error);
