@@ -70,7 +70,7 @@ async fn should_serve_content_type() -> Result<()> {
 }
 
 #[tokio::test]
-async fn should_serve_with_revalidation() -> Result<()> {
+async fn should_serve_not_modified_with_revalidation() -> Result<()> {
     tracing_subscriber::fmt::try_init().unwrap_or_default();
 
     let srv = StaticService::new(&ASSETS);
@@ -91,6 +91,35 @@ async fn should_serve_with_revalidation() -> Result<()> {
     let (parts, _) = resp.into_parts();
 
     assert_eq!(parts.status, StatusCode::NOT_MODIFIED);
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn should_serve_content_with_etag_from_different_resource() -> Result<()> {
+    tracing_subscriber::fmt::try_init().unwrap_or_default();
+
+    let srv = StaticService::new(&ASSETS);
+    let req = Request::builder()
+        .uri("/js/canary.js")
+        .body(Body::empty())?;
+    let resp = srv.clone().oneshot(req).await.context("Fetch response")?;
+
+    let (parts, _) = resp.into_parts();
+    assert_eq!(parts.status, StatusCode::OK);
+    let entity_tag = parts.headers.get(ETAG).expect("some ETag header");
+
+    let mut req_builder = Request::builder().uri("/canary.html");
+    req_builder
+        .headers_mut()
+        .expect("valid builder")
+        .insert(IF_NONE_MATCH, entity_tag.clone());
+    let req = req_builder.body(Body::empty())?;
+
+    let resp = srv.oneshot(req).await.context("Fetch response")?;
+    let (parts, _) = resp.into_parts();
+
+    assert_eq!(parts.status, StatusCode::OK);
 
     Ok(())
 }
