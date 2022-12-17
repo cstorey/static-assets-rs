@@ -1,5 +1,9 @@
 use std::task;
 
+use base64::{
+    alphabet::URL_SAFE,
+    engine::fast_portable::{FastPortable, NO_PAD},
+};
 use futures::future;
 use hyper::{
     header::{CONTENT_TYPE, ETAG},
@@ -51,13 +55,8 @@ impl Service<Request<Body>> for StaticService {
             }
         };
 
-        let etag = {
-            let mut buf = String::with_capacity(ETAG_STRING_SIZE);
-            buf.push('"');
-            base64::encode_config_buf(asset.digest, base64::URL_SAFE_NO_PAD, &mut buf);
-            buf.push('"');
-            buf
-        };
+        let mut buf = [0u8; ETAG_STRING_SIZE];
+        let etag = encode_etag(&mut buf, asset);
 
         let not_modified = req
             .headers()
@@ -79,4 +78,15 @@ impl Service<Request<Body>> for StaticService {
             .body(Body::from(asset.content));
         future::ready(resp)
     }
+}
+
+fn encode_etag<'a>(buf: &'a mut [u8; ETAG_STRING_SIZE], asset: &static_assets::Asset) -> &'a str {
+    const BASE64_ENGINE: FastPortable = FastPortable::from(&URL_SAFE, NO_PAD);
+    let mut off = 0;
+    buf[off] = b'"';
+    off += 1;
+    off += base64::encode_engine_slice(asset.digest, &mut buf[off..], &BASE64_ENGINE);
+    buf[off] = b'"';
+    off += 1;
+    std::str::from_utf8(&buf[..off]).expect("Should only generate ASCII")
 }
