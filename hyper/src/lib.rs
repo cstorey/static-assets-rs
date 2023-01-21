@@ -2,7 +2,8 @@ use std::task;
 
 use base64::{
     alphabet::URL_SAFE,
-    engine::fast_portable::{FastPortable, NO_PAD},
+    engine::{general_purpose::NO_PAD, GeneralPurpose},
+    Engine,
 };
 use futures::future;
 use hyper::{
@@ -81,11 +82,13 @@ impl Service<Request<Body>> for StaticService {
 }
 
 fn encode_etag<'a>(buf: &'a mut [u8; ETAG_STRING_SIZE], asset: &static_assets::Asset) -> &'a str {
-    const BASE64_ENGINE: FastPortable = FastPortable::from(&URL_SAFE, NO_PAD);
+    const BASE64_ENGINE: GeneralPurpose = GeneralPurpose::new(&URL_SAFE, NO_PAD);
     let mut off = 0;
     buf[off] = b'"';
     off += 1;
-    off += base64::encode_engine_slice(asset.digest, &mut buf[off..], &BASE64_ENGINE);
+    off += BASE64_ENGINE
+        .encode_slice(asset.digest, &mut buf[off..])
+        .unwrap();
     buf[off] = b'"';
     off += 1;
     std::str::from_utf8(&buf[..off]).expect("Should only generate ASCII")
