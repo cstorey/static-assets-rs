@@ -1,6 +1,6 @@
 [package]
 name = "static-assets-hyper"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Ceri Storey <cez@necrofish.org.uk>"]
 edition = "2021"
 
@@ -8,17 +8,15 @@ edition = "2021"
 anyhow = { version = "1.0.56", features = [ "backtrace" ] }
 hyper = { version = "0.14.17", features=["tcp", "http1", "server"]}
 tokio = { version = "1.17.0", features = ["rt"] }
-static-assets = { version = "^0.1", path = "../core" }
-static-assets-macros = { version = "^0.1", path = "../macros" }
+static-assets = { version = "^0.2", path = "../core" }
+static-assets-macros = { version = "^0.2", path = "../macros" }
 futures = "0.3.21"
-tower-http = "0.4.0"
 tower = "0.4.12"
 base64 = "0.21"
 tracing = "0.1.32"
 
 [dev-dependencies]
-tokio = {version="1.17.0", features=["full"]}
-tower-http = { version = "0.4.0", features = [] }
+tokio = { version="1.17.0", features=["full"] }
 tower = { version = "0.4.12", features=["util"] }
 typed-headers = "0.2.0"
 mime = "0.3.16"

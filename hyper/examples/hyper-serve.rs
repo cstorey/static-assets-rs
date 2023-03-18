@@ -3,9 +3,10 @@ use std::convert::Infallible;
 use anyhow::Result;
 use hyper::service::make_service_fn;
 use hyper::Server;
-use static_assets_hyper::{static_assets, StaticService};
+use static_assets::Map;
+use static_assets_hyper::{assets, StaticService};
 
-static_assets!(ASSETS, "examples/assets");
+static ASSETS: Map = assets!("examples/assets");
 
 #[tokio::main]
 async fn main() -> Result<()> {

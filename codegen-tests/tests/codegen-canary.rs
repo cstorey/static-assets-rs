@@ -1,5 +1,7 @@
 mod assets {
-    include!(concat!(env!("OUT_DIR"), "/canary-gen.rs"));
+    use static_assets::Map;
+
+    pub(crate) static ASSETS: Map = include!(concat!(env!("OUT_DIR"), "/canary-gen.rs"));
 }
 
 #[test]
