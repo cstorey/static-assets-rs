@@ -9,7 +9,7 @@ build = "build.rs"
 [build-dependencies]
 static-assets-codegen = { version = "0.1.0", path = "../codegen" }
 anyhow = "1.0.56"
-syn = "1.0.89"
+syn = "2.0.0"
 tempfile = "3.3.0"
 prettyplease = "0.1.7"
 
