@@ -15,7 +15,7 @@ use hyper::{
 use static_assets::Map;
 use tracing::{debug, trace};
 
-pub use static_assets_macros::static_assets;
+pub use static_assets_macros::assets;
 
 const ETAG_STRING_SIZE: usize = 45;
 

@@ -4,13 +4,14 @@ use hyper::{
     header::{ETAG, IF_NONE_MATCH},
     Body, Request, StatusCode,
 };
+use static_assets::Map;
 use tower::ServiceExt;
 use tracing::warn;
 
-use static_assets_hyper::{static_assets, StaticService};
+use static_assets_hyper::{assets, StaticService};
 use typed_headers::{ContentType, HeaderMapExt};
 
-static_assets!(ASSETS, "../macros/tests/assets");
+static ASSETS: Map = assets!("../macros/tests/assets");
 
 #[tokio::test]
 async fn should_serve_asset_content() -> Result<()> {

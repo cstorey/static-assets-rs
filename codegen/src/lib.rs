@@ -6,7 +6,6 @@ use std::path::{Path, PathBuf};
 use blake2::{Blake2s256, Digest};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use syn::parse_quote;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -33,11 +32,7 @@ fn root_dir() -> Result<PathBuf, Error> {
     Ok(PathBuf::from(base).canonicalize()?)
 }
 
-pub fn generate(
-    visibility: syn::Visibility,
-    name: syn::Ident,
-    path: &Path,
-) -> Result<TokenStream, Error> {
+pub fn generate(path: &Path) -> Result<TokenStream, Error> {
     let dir = root_dir()?.join(path);
 
     let mut files = BTreeSet::new();
@@ -84,26 +79,16 @@ pub fn generate(
     }
 
     let out = quote!(
-        #visibility static #name : ::static_assets::Map<'static> = ::static_assets::Map{ members: &[#members]};
+       ::static_assets::Map{ members: &[#members]}
     );
 
     Ok(out)
 }
 
-pub fn generate_to_file(
-    visibility: syn::Visibility,
-    name: syn::Ident,
-    assets_path: &std::path::Path,
-    target: PathBuf,
-) -> Result<(), Error> {
-    let content = generate(visibility, name, assets_path)?;
+pub fn generate_to_file(assets_path: &std::path::Path, target: PathBuf) -> Result<(), Error> {
+    let content = generate(assets_path)?;
 
-    write_file_if_changed(
-        &target,
-        &prettyplease::unparse(&parse_quote!(
-            #content
-        )),
-    )?;
+    write_file_if_changed(&target, &format!("{}", content))?;
 
     Ok(())
 }

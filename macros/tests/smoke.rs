@@ -1,9 +1,10 @@
 use std::collections::BTreeSet;
 
-use static_assets_macros::static_assets;
+use static_assets::Map;
+use static_assets_macros::assets;
 
-static_assets!(ASSETS, "tests/assets");
-static_assets!(pub(crate) PUB_CRATE_ASSETS, "tests/assets");
+static ASSETS: Map = assets!("tests/assets");
+pub(crate) static PUB_CRATE_ASSETS: Map = assets!("tests/assets");
 
 #[test]
 fn should_lookup_example() {
