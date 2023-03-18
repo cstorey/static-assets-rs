@@ -1,6 +1,6 @@
 [package]
 name = "static-assets-macros"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Ceri Storey <cez@necrofish.org.uk>"]
 edition = "2021"
 workspace = "../"
@@ -9,7 +9,7 @@ workspace = "../"
 proc-macro = true
 
 [dev-dependencies]
-static-assets = { version = "^0.1", path = "../core" }
+static-assets = { version = "^0.2", path = "../core" }
 [dependencies]
 quote = "1.0.0"
 syn = "1.0.1"
@@ -17,4 +17,4 @@ walkdir = "2.2.7"
 proc-macro2 = "1.0.0"
 mime_guess = "2.0.0"
 blake2 = "0.10.0"
-static-assets-codegen = { version = "0.1.0", path = "../codegen" }
+static-assets-codegen = { version = "^0.2", path = "../codegen" }
