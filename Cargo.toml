@@ -5,4 +5,5 @@ members = [
   "codegen-tests",
   "macros",
   "hyper",
+  "axum",
 ]
