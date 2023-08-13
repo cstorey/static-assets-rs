@@ -1,5 +1,5 @@
 [package]
-name = "static-assets-hyper"
+name = "static-assets-axum"
 version = "0.2.0"
 authors = ["Ceri Storey <cez@necrofish.org.uk>"]
 edition = "2021"
@@ -9,9 +9,11 @@ hyper = { version = "0.14.17", features=["tcp", "http1", "server"]}
 tokio = { version = "1.17.0", features = ["rt"] }
 static-assets = { version = "^0.2", path = "../core" }
 static-assets-macros = { version = "^0.2", path = "../macros" }
-futures = "0.3.21"
 base64 = "0.21"
 tracing = "0.1.32"
+axum = { version = "0.6.1", default-features = false, features = ["macros", "headers"] }
+thiserror = "1.0.44"
+
 
 [dev-dependencies]
 anyhow = { version = "1.0.56", features = [ "backtrace" ] }
