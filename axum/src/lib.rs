@@ -11,8 +11,7 @@ use base64::{
     Engine,
 };
 use hyper::{
-    header::{InvalidHeaderValue, CONTENT_TYPE, ETAG, IF_NONE_MATCH},
-    http::HeaderValue,
+    header::{CONTENT_TYPE, ETAG, IF_NONE_MATCH},
     Body, HeaderMap, StatusCode,
 };
 use static_assets::Map;
@@ -23,8 +22,6 @@ const ETAG_STRING_SIZE: usize = 45;
 
 #[derive(Debug, thiserror::Error)]
 enum Error {
-    #[error("invalid header: {0:?}")]
-    InvalidHeaderValue(#[from] InvalidHeaderValue),
     #[error("http")]
     Http(#[from] axum::http::Error),
 }
@@ -63,8 +60,8 @@ async fn get_asset(
     }
 
     let resp = Response::builder()
-        .header(CONTENT_TYPE, HeaderValue::from_static(asset.content_type))
-        .header(ETAG, HeaderValue::from_str(etag)?)
+        .header(CONTENT_TYPE, asset.content_type)
+        .header(ETAG, etag)
         .body(Body::from(asset.content))?;
 
     Ok(resp)
