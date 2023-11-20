@@ -5,7 +5,7 @@ authors = ["Ceri Storey <cez@necrofish.org.uk>"]
 edition = "2021"
 
 [dependencies]
-hyper = { version = "0.14.17", features=["tcp", "http1", "server"]}
+hyper = { version = "1.0.1", features=["tcp", "http1", "server"]}
 tokio = { version = "1.17.0", features = ["rt"] }
 static-assets = { version = "^0.2", path = "../core" }
 static-assets-macros = { version = "^0.2", path = "../macros" }
