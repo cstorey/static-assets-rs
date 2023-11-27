@@ -11,7 +11,7 @@ static-assets = { version = "^0.2", path = "../core" }
 static-assets-macros = { version = "^0.2", path = "../macros" }
 base64 = "0.21"
 tracing = "0.1.32"
-axum = { version = "0.6.1", default-features = false, features = ["macros", "headers"] }
+axum = { version = "0.7.1", default-features = false, features = ["macros", "headers"] }
 thiserror = "1.0.44"
 
 
@@ -21,5 +21,5 @@ tokio = { version="1.17.0", features=["full"] }
 tower = { version = "0.4.12", features=["util"] }
 typed-headers = "0.2.0"
 mime = "0.3.16"
-axum = "0.6.1"
+axum = "0.7.1"
 tracing-subscriber = "0.3.9"
