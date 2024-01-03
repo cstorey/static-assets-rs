@@ -17,7 +17,7 @@ tracing = "0.1.32"
 anyhow = { version = "1.0.56", features = [ "backtrace" ] }
 tokio = { version="1.17.0", features=["full"] }
 tower = { version = "0.4.12", features=["util"] }
-typed-headers = "0.2.0"
 mime = "0.3.16"
 axum = "0.6.1"
 tracing-subscriber = "0.3.9"
+headers = "0.3.9"

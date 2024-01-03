@@ -1,5 +1,6 @@
 use anyhow::{Context, Result};
 use axum::{routing::get_service, Router};
+use headers::{ContentType, HeaderMapExt};
 use hyper::{
     header::{ETAG, IF_NONE_MATCH},
     Body, Request, StatusCode,
@@ -9,7 +10,6 @@ use tower::ServiceExt;
 use tracing::warn;
 
 use static_assets_hyper::{assets, StaticService};
-use typed_headers::{ContentType, HeaderMapExt};
 
 static ASSETS: Map = assets!("../macros/tests/assets");
 
@@ -57,15 +57,11 @@ async fn should_serve_content_type() -> Result<()> {
     let resp = srv.oneshot(req).await.context("Fetch response")?;
     let (parts, _) = resp.into_parts();
 
-    let content_type = parts
+    let content_type: ContentType = parts
         .headers
         .typed_get::<ContentType>()
-        .expect("content-type header decode")
-        .expect("some content-type header");
-    assert_eq!(
-        (content_type.type_(), content_type.subtype()),
-        (mime::TEXT, mime::HTML)
-    );
+        .expect("content-type header decode");
+    assert_eq!(content_type, ContentType::html(),);
 
     Ok(())
 }
