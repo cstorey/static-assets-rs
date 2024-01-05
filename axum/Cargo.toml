@@ -5,21 +5,20 @@ authors = ["Ceri Storey <cez@necrofish.org.uk>"]
 edition = "2021"
 
 [dependencies]
-hyper = { version = "0.14.17", features=["tcp", "http1", "server"]}
+hyper = { version = "1.0.1", features=["http1", "server"]}
 tokio = { version = "1.17.0", features = ["rt"] }
 static-assets = { version = "^0.2", path = "../core" }
 static-assets-macros = { version = "^0.2", path = "../macros" }
 base64 = "0.21"
 tracing = "0.1.32"
-axum = { version = "0.6.1", default-features = false, features = ["macros", "headers"] }
+axum = { version = "0.7.1", default-features = false, features = ["macros"] }
 thiserror = "1.0.44"
-
 
 [dev-dependencies]
 anyhow = { version = "1.0.56", features = [ "backtrace" ] }
 tokio = { version="1.17.0", features=["full"] }
 tower = { version = "0.4.12", features=["util"] }
 mime = "0.3.16"
-axum = "0.6.1"
 tracing-subscriber = "0.3.9"
-headers = "0.3.9"
+http-body-util = "0.1.0"
+headers = "0.4.0"

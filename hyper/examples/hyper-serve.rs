@@ -1,10 +1,11 @@
-use std::convert::Infallible;
+use std::net::SocketAddr;
 
 use anyhow::Result;
-use hyper::service::make_service_fn;
-use hyper::Server;
+use hyper::server::conn::http1;
+use hyper_util::rt::TokioIo;
 use static_assets::Map;
 use static_assets_hyper::{assets, StaticService};
+use tokio::net::TcpListener;
 
 static ASSETS: Map = assets!("examples/assets");
 
@@ -12,15 +13,32 @@ static ASSETS: Map = assets!("examples/assets");
 async fn main() -> Result<()> {
     tracing_subscriber::fmt::try_init().unwrap_or_default();
 
-    let make_svc =
-        make_service_fn(|_conn| async { Ok::<_, Infallible>(StaticService::new(&ASSETS)) });
+    let static_service = StaticService::new(&ASSETS);
 
-    let addr = ([127, 0, 0, 1], 8088).into();
+    let addr = SocketAddr::new([127, 0, 0, 1].into(), 8088);
 
-    let server = Server::bind(&addr).serve(make_svc);
+    let listener = TcpListener::bind(addr).await?;
+    println!("http://{:?}/index.html", listener.local_addr()?);
 
-    println!("http://{:?}/index.html", server.local_addr());
-    server.await?;
+    loop {
+        let (stream, _) = listener.accept().await?;
 
-    Ok(())
+        // Use an adapter to access something implementing `tokio::io` traits as if they implement
+        // `hyper::rt` IO traits.
+        let io = TokioIo::new(stream);
+
+        let svc = static_service.clone();
+
+        // Spawn a tokio task to serve multiple connections concurrently
+        tokio::task::spawn(async move {
+            // Finally, we bind the incoming connection to our `hello` service
+            if let Err(err) = http1::Builder::new()
+                // `service_fn` converts our function in a `Service`
+                .serve_connection(io, svc)
+                .await
+            {
+                println!("Error serving connection: {:?}", err);
+            }
+        });
+    }
 }

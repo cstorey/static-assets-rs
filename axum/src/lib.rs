@@ -1,4 +1,5 @@
 use axum::{
+    body::Body,
     debug_handler,
     extract::State,
     response::{IntoResponse, Response},
@@ -12,7 +13,7 @@ use base64::{
 };
 use hyper::{
     header::{CONTENT_TYPE, ETAG, IF_NONE_MATCH},
-    Body, HeaderMap, StatusCode,
+    HeaderMap, StatusCode,
 };
 use static_assets::Map;
 pub use static_assets_macros::assets;
@@ -55,7 +56,7 @@ async fn get_asset(
     if not_modified {
         let resp = Response::builder()
             .status(StatusCode::NOT_MODIFIED)
-            .body(Body::empty())?;
+            .body(Body::default())?;
         return Ok(resp);
     }
 
