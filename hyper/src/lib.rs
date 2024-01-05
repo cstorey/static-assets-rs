@@ -1,16 +1,16 @@
-use std::task;
-
 use base64::{
     alphabet::URL_SAFE,
     engine::{general_purpose::NO_PAD, GeneralPurpose},
     Engine,
 };
+use bytes::Bytes;
 use futures::future;
+use http_body_util::Full;
 use hyper::{
     header::{CONTENT_TYPE, ETAG},
     http,
     service::Service,
-    Body, Request, Response, StatusCode,
+    Request, Response, StatusCode,
 };
 use static_assets::Map;
 use tracing::{debug, trace};
@@ -30,18 +30,15 @@ impl StaticService {
     }
 }
 
-impl Service<Request<Body>> for StaticService {
-    type Response = Response<Body>;
+impl<B: hyper::body::Body> Service<Request<B>> for StaticService {
+    // TODO: use UnsyncBoxBody<Bytes, Error>, a-la: https://docs.rs/tower-http/latest/tower_http/services/fs/struct.ServeFileSystemResponseBody.html ?
+    type Response = Response<Full<Bytes>>;
 
     type Error = http::Error;
 
     type Future = future::Ready<Result<Self::Response, Self::Error>>;
 
-    fn poll_ready(&mut self, _: &mut task::Context<'_>) -> task::Poll<Result<(), Self::Error>> {
-        task::Poll::Ready(Ok(()))
-    }
-
-    fn call(&mut self, req: Request<Body>) -> Self::Future {
+    fn call(&self, req: Request<B>) -> Self::Future {
         let path = req.uri().path();
         let tail = path.strip_prefix('/').unwrap_or(path);
         trace!(?path, ?tail, "Paths");
@@ -51,7 +48,7 @@ impl Service<Request<Body>> for StaticService {
                 debug!(?path, "No match for path");
                 let resp = Response::builder()
                     .status(StatusCode::NOT_FOUND)
-                    .body(Body::empty());
+                    .body(Full::default());
                 return future::ready(resp);
             }
         };
@@ -69,14 +66,14 @@ impl Service<Request<Body>> for StaticService {
         if not_modified {
             let resp = Response::builder()
                 .status(StatusCode::NOT_MODIFIED)
-                .body(Body::empty());
+                .body(Full::default());
             return future::ready(resp);
         }
 
         let resp = Response::builder()
             .header(CONTENT_TYPE, asset.content_type)
             .header(ETAG, etag)
-            .body(Body::from(asset.content));
+            .body(Full::from(asset.content));
         future::ready(resp)
     }
 }

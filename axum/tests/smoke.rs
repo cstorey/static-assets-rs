@@ -1,9 +1,10 @@
 use anyhow::{Context, Result};
-use axum::{routing::get_service, Router};
+use axum::{body::Body, routing::get_service, Router};
 use headers::{ContentType, HeaderMapExt};
+use http_body_util::BodyExt;
 use hyper::{
     header::{ETAG, IF_NONE_MATCH},
-    Body, Request, StatusCode,
+    Request, StatusCode,
 };
 use static_assets::Map;
 use tower::ServiceExt;
@@ -24,10 +25,8 @@ async fn should_serve_asset_content() -> Result<()> {
 
     assert!(resp.status().is_success());
 
-    let (_, body) = resp.into_parts();
-    let body = hyper::body::to_bytes(body).await.unwrap();
-    let bodystr = std::str::from_utf8(&body).context("utf8 body")?;
-    assert_eq!(bodystr, "<p>Hi!</p>\n");
+    let body = resp.into_body().collect().await?.to_bytes();
+    assert_eq!(body, "<p>Hi!</p>\n");
 
     Ok(())
 }
@@ -59,6 +58,7 @@ async fn should_serve_content_type() -> Result<()> {
 
     let content_type: ContentType = parts
         .headers
+        // Waiting on typed-headers to upgrade to http 1.0
         .typed_get::<ContentType>()
         .expect("content-type header decode");
     assert_eq!(content_type, ContentType::html(),);
@@ -150,7 +150,12 @@ async fn should_serve_nested_in_axum() -> Result<()> {
     println!("Resp: {:?}", resp);
     assert!(resp.status().is_success());
 
-    let body = hyper::body::to_bytes(resp.into_body()).await?;
+    let body = resp
+        .into_body()
+        .collect()
+        .await
+        .expect("collecting body")
+        .to_bytes();
     let bodystr = std::str::from_utf8(&body).context("utf8 body")?;
 
     assert_eq!(bodystr, "<p>Hi!</p>\n");
