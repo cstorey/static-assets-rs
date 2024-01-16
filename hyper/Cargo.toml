@@ -18,9 +18,7 @@ http-body-util = "0.1.0"
 [dev-dependencies]
 anyhow = { version = "1.0.56", features = [ "backtrace" ] }
 tokio = { version="1.17.0", features=["full"] }
-tower = { version = "0.4.12", features=["util"] }
 mime = "0.3.16"
-axum = "0.6.1"
 tracing-subscriber = "0.3.9"
 hyper-util = { version = "0.1.1", features = ["server", "http1", "tokio"] }
 http-body-util = "0.1.0"
