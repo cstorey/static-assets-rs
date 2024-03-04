@@ -9,7 +9,7 @@ hyper = { version = "1.0.1", features=["http1", "server"]}
 tokio = { version = "1.17.0", features = ["rt"] }
 static-assets = { version = "^0.2", path = "../core" }
 static-assets-macros = { version = "^0.2", path = "../macros" }
-base64 = "0.21"
+base64 = "0.22"
 tracing = "0.1.32"
 axum = { version = "0.7.1", default-features = false, features = ["macros"] }
 thiserror = "1.0.44"
